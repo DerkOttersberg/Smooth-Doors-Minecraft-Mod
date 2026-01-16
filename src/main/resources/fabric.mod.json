@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "fancy-door-anim",
+	"version": "${version}",
+	"name": "Fancy Door Animations",
+	"description": "Smooth client-side door open/close animation compatible with resource packs.",
+	"authors": ["Yomna"],
+	"contact": {},
+	"license": "CC0-1.0",
+	"icon": "assets/fancy-door-anim/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["io.github.yxmna.fancydooranim.FancyDoorAnimClient"]
+	},
+	"mixins": [
+		"fancy-door-anim.client.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": ">=1.21.0",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
