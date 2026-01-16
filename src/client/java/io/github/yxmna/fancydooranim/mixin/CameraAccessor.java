@@ -1,4 +1,4 @@
-package io.github.yxmna.fancydooranim.mixin;
+package io.github.derk.smoothdoors.mixin;
 
 import net.minecraft.client.render.Camera;
 import net.minecraft.util.math.Vec3d;

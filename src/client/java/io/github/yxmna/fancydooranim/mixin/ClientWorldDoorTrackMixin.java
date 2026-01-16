@@ -1,7 +1,7 @@
-package io.github.yxmna.fancydooranim.mixin;
+package io.github.derk.smoothdoors.mixin;
 
-import io.github.yxmna.fancydooranim.DoorAnimMath;
-import io.github.yxmna.fancydooranim.DoorAnimationTracker;
+import io.github.derk.smoothdoors.DoorAnimMath;
+import io.github.derk.smoothdoors.DoorAnimationTracker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.DoorBlock;
@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Environment(value=EnvType.CLIENT)
 @Mixin(value=ClientWorld.class)
 public class ClientWorldDoorTrackMixin {
-    private static final Logger FDA_LOG = LoggerFactory.getLogger("fancy-door-anim");
+    private static final Logger FDA_LOG = LoggerFactory.getLogger("smooth-doors");
 
     private void fancydooranim$trackDoor(BlockPos pos, boolean opening, DoorHinge hinge, DoubleBlockHalf half, Direction facing) {
         DoorAnimationTracker.put(pos, opening, hinge, half, facing);

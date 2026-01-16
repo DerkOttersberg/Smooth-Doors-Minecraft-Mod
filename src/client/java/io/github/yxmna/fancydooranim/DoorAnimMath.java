@@ -1,4 +1,4 @@
-package io.github.yxmna.fancydooranim;
+package io.github.derk.smoothdoors;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

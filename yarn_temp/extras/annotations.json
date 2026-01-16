@@ -1,0 +1,1 @@
+{"version":1,"classes":{"net/minecraft/class_2338":{"methods":{"method_10081(Lnet/minecraft/class_2382;)Lnet/minecraft/class_2338;":{"add":[{"desc":"Lorg/jetbrains/annotations/Contract;","values":{"pure":{"type":"boolean","value":true}}}]}}}},"namespace":"intermediary"}

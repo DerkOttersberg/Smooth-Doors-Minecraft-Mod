@@ -1,4 +1,4 @@
-package io.github.yxmna.fancydooranim;
+package io.github.derk.smoothdoors;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,15 +15,16 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 @Environment(value=EnvType.CLIENT)
 public class DoorAnimationTracker {
-    private static final Logger LOG = LoggerFactory.getLogger("fancy-door-anim");
+    private static final Logger LOG = LoggerFactory.getLogger("smooth-doors");
     public static final long ANIM_DURATION_NANOS = 240000000L;
     public static final long REVEAL_LEAD_NANOS = 50000000L;
     private static final long DEDUPE_WINDOW_NANOS = 150000000L;
-    private static final Map<BlockPos, Entry> entries = new HashMap<>();
+    private static final Map<BlockPos, Entry> entries = new ConcurrentHashMap<>();
 
     public static void put(BlockPos pos, boolean opening, DoorHinge hinge, DoubleBlockHalf half, Direction facing) {
         long now = System.nanoTime();
@@ -77,7 +78,7 @@ public class DoorAnimationTracker {
     }
 
     public static void forEachActive(BiConsumer<BlockPos, Entry> consumer) {
-        HashMap<BlockPos, Entry> snapshot = new HashMap<>(entries);
+        Map<BlockPos, Entry> snapshot = new HashMap<>(entries);
         for (Map.Entry<BlockPos, Entry> it : snapshot.entrySet()) {
             consumer.accept(it.getKey(), it.getValue());
         }
@@ -94,10 +95,11 @@ public class DoorAnimationTracker {
     }
 
     public static boolean isAnimating(BlockPos pos) {
-        if (entries.containsKey(pos)) {
-            return true;
+        boolean result = entries.containsKey(pos) || entries.containsKey(pos.down());
+        if (result && LOG.isDebugEnabled()) {
+            LOG.debug("[FDA] isAnimating({}) = true, entries.size={}", pos, entries.size());
         }
-        return entries.containsKey(pos.down());
+        return result;
     }
 
     private static void requestRerender(BlockPos pos) {

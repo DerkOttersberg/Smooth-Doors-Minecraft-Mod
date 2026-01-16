@@ -1,7 +1,7 @@
-package io.github.yxmna.fancydooranim.render;
+package io.github.derk.smoothdoors.render;
 
-import io.github.yxmna.fancydooranim.DoorAnimMath;
-import io.github.yxmna.fancydooranim.DoorAnimationTracker;
+import io.github.derk.smoothdoors.DoorAnimMath;
+import io.github.derk.smoothdoors.DoorAnimationTracker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.DoorBlock;

@@ -1,6 +1,6 @@
-package io.github.yxmna.fancydooranim.mixin;
+package io.github.derk.smoothdoors.mixin;
 
-import io.github.yxmna.fancydooranim.render.DoorAnimatedOverlay;
+import io.github.derk.smoothdoors.render.DoorAnimatedOverlay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;

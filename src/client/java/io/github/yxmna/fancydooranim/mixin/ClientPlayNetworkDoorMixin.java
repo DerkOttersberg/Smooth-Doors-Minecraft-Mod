@@ -1,7 +1,7 @@
-package io.github.yxmna.fancydooranim.mixin;
+package io.github.derk.smoothdoors.mixin;
 
-import io.github.yxmna.fancydooranim.DoorAnimMath;
-import io.github.yxmna.fancydooranim.DoorAnimationTracker;
+import io.github.derk.smoothdoors.DoorAnimMath;
+import io.github.derk.smoothdoors.DoorAnimationTracker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.DoorBlock;
@@ -23,10 +23,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Environment(value=EnvType.CLIENT)
 @Mixin(value=ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkDoorMixin {
-    private static final Logger FDA_LOG = LoggerFactory.getLogger("fancy-door-anim");
+    private static final Logger FDA_LOG = LoggerFactory.getLogger("smooth-doors");
+    private static final Map<BlockPos, Boolean> doorStateCache = new ConcurrentHashMap<>();
 
     @Inject(method="onBlockUpdate", at=@At("HEAD"))
     private void fancydooranim$onBlockUpdate(BlockUpdateS2CPacket packet, CallbackInfo ci) {
@@ -35,7 +39,10 @@ public class ClientPlayNetworkDoorMixin {
         if (world == null) {
             return;
         }
-        handleDoorStateChange(world, packet.getPos(), packet.getState());
+        // Capture old state BEFORE packet is processed
+        BlockPos pos = packet.getPos();
+        BlockState oldState = world.getBlockState(pos);
+        handleDoorStateChange(world, pos, packet.getState(), oldState);
     }
 
     @Inject(method="onChunkDeltaUpdate", at=@At("HEAD"))
@@ -45,21 +52,32 @@ public class ClientPlayNetworkDoorMixin {
         if (world == null) {
             return;
         }
-        packet.visitUpdates((pos, state) -> handleDoorStateChange(world, pos, state));
+        packet.visitUpdates((pos, state) -> {
+            BlockState oldState = world.getBlockState(pos);
+            handleDoorStateChange(world, pos, state, oldState);
+        });
     }
 
-    private static void handleDoorStateChange(final ClientWorld world, BlockPos pos, final BlockState newState) {
+    private static void handleDoorStateChange(final ClientWorld world, BlockPos pos, final BlockState newState, final BlockState oldState) {
         if (!(newState.getBlock() instanceof DoorBlock)) {
             return;
         }
         
-        BlockState oldState = world.getBlockState(pos);
+        FDA_LOG.info("[FDA][NET] Detected door block update at {}", pos);
+        
         if (!newState.contains(Properties.OPEN)) {
             return;
         }
         
-        boolean wasOpen = oldState.getBlock() instanceof DoorBlock && oldState.get(Properties.OPEN);
+        // Get cached old state, or false if not cached
+        Boolean cachedWasOpen = doorStateCache.get(pos);
+        boolean wasOpen = cachedWasOpen != null ? cachedWasOpen : false;
         boolean isOpen = newState.get(Properties.OPEN);
+        
+        // Update cache with new state
+        doorStateCache.put(pos.toImmutable(), isOpen);
+        
+        FDA_LOG.info("[FDA][NET] Door at {} - wasOpen={}, isOpen={}", pos, wasOpen, isOpen);
         
         if (wasOpen == isOpen) {
             return;
@@ -81,13 +99,20 @@ public class ClientPlayNetworkDoorMixin {
                 if (mc.worldRenderer == null) {
                     return;
                 }
-                BlockState lowerNew = newState.with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
+                // Force chunk rebuilds to hide/show the door during animation
                 BlockPos upPos = basePos.up();
-                BlockState upperNew = newState.with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER);
-                BlockState oldLower = world.getBlockState(basePos);
-                mc.worldRenderer.updateBlock(null, basePos, oldLower, lowerNew, 0);
-                BlockState oldUpper = world.getBlockState(upPos);
-                mc.worldRenderer.updateBlock(null, upPos, oldUpper, upperNew, 0);
+                FDA_LOG.info("[FDA][NET] Scheduling chunk rebuilds for door at {} and {}", basePos, upPos);
+                
+                // Schedule rebuild for the chunk sections containing both door halves
+                int chunkX = basePos.getX() >> 4;
+                int chunkZ = basePos.getZ() >> 4;
+                int sectionY1 = basePos.getY() >> 4;
+                int sectionY2 = upPos.getY() >> 4;
+                
+                mc.worldRenderer.scheduleBlockRenders(chunkX, sectionY1, chunkZ, chunkX, sectionY1, chunkZ);
+                if (sectionY2 != sectionY1) {
+                    mc.worldRenderer.scheduleBlockRenders(chunkX, sectionY2, chunkZ, chunkX, sectionY2, chunkZ);
+                }
             });
         }
         
