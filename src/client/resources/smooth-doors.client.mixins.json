@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "io.github.derk.smoothdoors.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BlockModelRendererMixin",
+    "CameraAccessor",
+    "ClientWorldDoorTrackMixin",
+    "ClientPlayNetworkDoorMixin",
+    "WorldRendererOverlayMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "smooth-doors",
+	"version": "${version}",
+	"name": "Derk's Smooth Doors",
+	"description": "Smooth client-side door open/close animation compatible with resource packs.",
+	"authors": ["Derk"],
+	"contact": {},
+	"license": "CC0-1.0",
+	"icon": "assets/smooth-doors/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["io.github.derk.smoothdoors.FancyDoorAnimClient"]
+	},
+	"mixins": [
+		"smooth-doors.client.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": ">=1.21.0",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
